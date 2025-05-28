@@ -1,4 +1,3 @@
-// Шахматные фигуры в Unicode
 const piecesUnicode = {
   'K': '♔', 'Q': '♕', 'R': '♖', 'B': '♗', 'N': '♘', 'P': '♙',
   'k': '♚', 'q': '♛', 'r': '♜', 'b': '♝', 'n': '♞', 'p': '♟'
@@ -22,7 +21,7 @@ const blackTimerElem = document.getElementById('black-timer');
 const logElem = document.getElementById('log');
 const resetBtn = document.getElementById('reset-btn');
 
-// Инициализация доски (стандартная расстановка)
+// инициализация доски (стандартная расстановка)
 function initBoard() {
   board = [
     ['r','n','b','q','k','b','n','r'],
@@ -74,18 +73,18 @@ function renderBoard() {
 }
 
 function highlightSelectedAndMoves() {
-  // Убрать выделение
+  // убрать выделение
   document.querySelectorAll('.cell').forEach(cell => {
     cell.style.outline = '';
     cell.style.backgroundColor = '';
   });
   if (selectedCell) {
-    // Выделить выбранную фигуру
+    // выделить выбранную фигуру
     let sel = getCellElement(selectedCell[0], selectedCell[1]);
     if (sel) {
       sel.style.outline = '3px solid orange';
     }
-    // Выделить возможные ходы
+    // выделить возможные ходы
     possibleMoves.forEach(([r,c]) => {
       let m = getCellElement(r,c);
       if (m) {
@@ -105,7 +104,7 @@ function onCellClick(e) {
   const col = +e.currentTarget.dataset.col;
   const piece = board[row][col];
   if (selectedCell) {
-    // Если кликнули на возможный ход - сделать ход
+    // если кликнули на возможный ход - сделать ход
     if (possibleMoves.some(m => m[0] === row && m[1] === col)) {
       makeMove(selectedCell, [row,col]);
       selectedCell = null;
@@ -116,20 +115,20 @@ function onCellClick(e) {
         switchPlayer();
       }
     } else {
-      // Выбрать новую фигуру, если там есть фигура текущего игрока
+      // выбрать новую фигуру, если там есть фигура текущего игрока
       if (piece && isOwnPiece(piece, currentPlayer)) {
         selectedCell = [row, col];
         possibleMoves = getValidMoves(row, col);
         renderBoard();
       } else {
-        // Сброс выбора
+        // сброс выбора
         selectedCell = null;
         possibleMoves = [];
         renderBoard();
       }
     }
   } else {
-    // Выбрать фигуру для хода
+    // выбрать фигуру для хода
     if (piece && isOwnPiece(piece, currentPlayer)) {
       selectedCell = [row, col];
       possibleMoves = getValidMoves(row, col);
@@ -145,7 +144,7 @@ function isOwnPiece(piece, player) {
 }
 
 function getValidMoves(row, col) {
-  // Возвращает все легальные ходы для фигуры в board[row][col]
+  // возвращает все легальные ходы для фигуры в board[row][col]
   const piece = board[row][col];
   if (!piece) return [];
 
@@ -160,7 +159,7 @@ function getValidMoves(row, col) {
     case 'k': moves = getKingMoves(row,col,piece); break;
   }
 
-  // Фильтруем ходы, при которых будет шах (нельзя ходить под шах)
+  // фильтруем ходы, при которых будет шах (нельзя ходить под шах)
   moves = moves.filter(move => {
     const [r,c] = move;
     const backupFrom = board[row][col];
@@ -182,19 +181,19 @@ function getPawnMoves(row, col, piece) {
   let moves = [];
   const dir = piece === piece.toUpperCase() ? -1 : 1; // белые идут вверх, черные вниз
   const startRow = piece === piece.toUpperCase() ? 6 : 1;
-  // Вперед
+  // вперед
   if (isEmpty(row + dir, col)) {
     moves.push([row + dir, col]);
-    // Двойной ход с начальной позиции
+    // двойной ход с начальной позиции
     if (row === startRow && isEmpty(row + 2*dir, col)) {
       moves.push([row + 2*dir, col]);
     }
   }
-  // Взятия
+  // взятия
   if (isEnemy(row + dir, col -1, piece)) moves.push([row + dir, col -1]);
   if (isEnemy(row + dir, col +1, piece)) moves.push([row + dir, col +1]);
 
-  // TODO: реализовать взятие на проходе (en passant)
+  // реализовать взятие на проходе
 
   return moves.filter(validPos);
 }
@@ -302,11 +301,11 @@ function makeMove(from, to) {
   board[tr][tc] = movingPiece;
   board[fr][fc] = '';
 
-  // Добавить ход в лог
+  // добавить ход в лог
   const moveNotation = notation(from, to, movingPiece, targetPiece);
   log(`${currentPlayer === 'w' ? 'Белые' : 'Чёрные'}: ${moveNotation}`);
 
-  // Продвинуть пешку при достижении конца (превращение пешки)
+  // превращение пешки(сделать выбор фигур))
   if ((movingPiece === 'P' && tr === 0) || (movingPiece === 'p' && tr === 7)) {
     board[tr][tc] = currentPlayer === 'w' ? 'Q' : 'q';
     log(`Пешка превратилась в ферзя.`);
@@ -314,7 +313,6 @@ function makeMove(from, to) {
 }
 
 function notation(from, to, piece, capture) {
-  // Простая нотация (без шаха и мата)
   const cols = 'abcdefgh';
   let moveStr = '';
   moveStr += piece.toUpperCase() !== 'P' ? piece.toUpperCase() : '';
@@ -334,8 +332,8 @@ function findKing(player) {
 }
 
 function isSquareAttacked(row,col, attacker) {
-  // Проверяем, может ли сторона attacker атаковать клетку row,col
-  // Мы проходим по всем фигурам attacker и смотрим, есть ли ход на эту клетку
+  // проверяем, может ли атакующий атаковать клетку row,col
+  // мы проходим по всем фигурам aтакующего и смотрим, есть ли ход на эту клетку
   for(let r=0;r<8;r++) {
     for(let c=0;c<8;c++) {
       const p = board[r][c];
@@ -350,7 +348,7 @@ function isSquareAttacked(row,col, attacker) {
 }
 
 function getPseudoMoves(row,col,piece) {
-  // Как getValidMoves, но без фильтра шаха (используется для проверки атак)
+  //используется для проверки атак
   switch(piece.toLowerCase()) {
     case 'p': return getPawnAttacks(row,col,piece);
     case 'r': return getLinearMoves(row,col,piece, [[1,0],[-1,0],[0,1],[0,-1]]);
@@ -371,7 +369,7 @@ function getPawnAttacks(row,col,piece) {
 }
 
 function checkGameStatus() {
-  // Проверить мат, пат, шах, окончание игры
+  // проверить мат, пат, шах, окончание игры
   const kingPos = findKing(currentPlayer);
   if (!kingPos) {
     log(`${currentPlayer === 'w' ? 'Белые' : 'Чёрные'} проиграли (король взят)!`);
@@ -380,7 +378,7 @@ function checkGameStatus() {
     return;
   }
   const inCheck = isSquareAttacked(kingPos[0], kingPos[1], oppositePlayer(currentPlayer));
-  // Есть ли у текущего игрока хоть один легальный ход?
+  // есть ли у текущего игрока хоть один легальный ход?
   let hasMoves = false;
   outer:
   for(let r=0;r<8;r++) {
@@ -473,7 +471,7 @@ function stopTimers() {
 }
 
 function restartTimersForCurrentPlayer() {
-  // Таймеры уменьшают время только для игрока, у которого ход
+  // таймеры уменьшают время только для игрока, у которого ход
 }
 
 function resetGame() {
@@ -482,7 +480,7 @@ function resetGame() {
   startTimers();
 }
 
-// Автостарт игры при загрузке
+// автостарт игры при загрузке
 window.onload = function() {
   initBoard();
   startTimers();
