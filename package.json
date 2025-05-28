@@ -1,0 +1,14 @@
+{
+  "name": "vanilla-chess",
+  "version": "1.0.0",
+  "description": "Простой шахматный движок на JavaScript без chess.js",
+  "main": "index.js",
+  "scripts": {
+    "start": "npx live-server"
+  },
+  "author": "Твоё имя",
+  "license": "MIT",
+  "devDependencies": {
+    "live-server": "^1.2.2"
+  }
+}
