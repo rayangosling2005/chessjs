@@ -1,492 +1,77 @@
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <title>Chess</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Шахматы</title>
     <style>
-        body { 
-            font-family: 'Roboto', sans-serif;
+        body {
+            font-family: Arial, sans-serif;
             text-align: center;
-            background-color: #f0f0f0;
-            margin: 0;
-            padding: 20px;
+            margin: 10px;
         }
-
-        .game-container {
-            max-width: 800px;
-            margin: 0 auto;
-            background-color: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-
-        h2 {
-            color: #333;
-            margin-bottom: 20px;
-        }
-
-        .chessboard {
+        #board {
             display: grid;
-            grid-template-columns: repeat(8, 60px);
-            grid-template-rows: repeat(8, 60px);
-            width: 480px;
-            margin: 0 auto;
+            grid-template-columns: repeat(8, 50px);
+            grid-template-rows: repeat(8, 50px);
+            margin: 20px auto;
+            width: 400px;
             border: 2px solid #333;
-            box-shadow: 0 0 15px rgba(0,0,0,0.2);
         }
-
         .cell {
-            width: 60px;
-            height: 60px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 40px;
+            width: 50px;
+            height: 50px;
+            line-height: 50px;
+            font-size: 32px;
             cursor: pointer;
-            position: relative;
-            transition: all 0.3s ease;
-        }
-
-        .cell:hover {
-            transform: scale(1.05);
-            z-index: 1;
-        }
-
-        .white { background-color: #f0d9b5; }
-        .black { background-color: #b58863; }
-        
-        .selected { 
-            outline: 3px solid #ff4444;
-            z-index: 2;
-        }
-
-        .possible-move {
-            position: relative;
-        }
-
-        .possible-move::after {
-            content: '';
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            background-color: rgba(0, 255, 0, 0.3);
-            border-radius: 50%;
-        }
-
-        .last-move {
-            background-color: rgba(255, 255, 0, 0.2);
-        }
-
-        .controls {
-            margin: 20px auto;
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .controls button {
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            transition: all 0.3s ease;
-        }
-
-        .controls button:hover {
-            background-color: #45a049;
-            transform: translateY(-2px);
-        }
-
-        #timer {
-            display: flex;
-            justify-content: space-around;
-            margin: 20px auto;
-            width: 480px;
-        }
-
-        .timer-box {
-            padding: 10px 20px;
-            background: #eee;
-            border-radius: 5px;
-            font-size: 18px;
-            font-weight: bold;
-            color: #333;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        #info {
-            display: flex;
-            justify-content: space-between;
-            width: 480px;
-            margin: 20px auto;
-            font-size: 18px;
-            color: #333;
-        }
-
-        #check-status {
-            color: #ff4444;
-            font-weight: bold;
-            margin: 10px 0;
-            height: 24px;
-        }
-
-        .game-info {
-            display: flex;
-            justify-content: space-between;
-            width: 480px;
-            margin: 20px auto;
-            gap: 20px;
-        }
-
-        .log-container {
-            flex: 1;
-            background: #fff;
-            border-radius: 5px;
-            padding: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        .log-title {
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: #333;
-        }
-
-        .log-content {
-            max-height: 200px;
-            overflow-y: auto;
-            font-size: 14px;
-            text-align: left;
-        }
-
-        .coordinates {
-            position: absolute;
-            font-size: 12px;
-            color: #666;
             user-select: none;
         }
-
-        .coord-x {
-            bottom: 2px;
-            right: 2px;
+        .light {
+            background-color: #f0d9b5;
         }
-
-        .coord-y {
-            top: 2px;
-            left: 2px;
+        .dark {
+            background-color: #b58863;
         }
-
-        /* Анимации */
-        @keyframes capture {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.2); }
-            100% { transform: scale(1); }
+        .white-fig {
+            color: #fff;
+            text-shadow: 0 0 3px #000;
         }
-
-        .captured {
-            animation: capture 0.3s ease;
+        .black-fig {
+            color: #000;
+            text-shadow: 0 0 3px #fff;
         }
-
-        /* Медиа-запросы для адаптивности */
-        @media (max-width: 600px) {
-            .chessboard {
-                width: 320px;
-                grid-template-columns: repeat(8, 40px);
-                grid-template-rows: repeat(8, 40px);
-            }
-
-            .cell {
-                width: 40px;
-                height: 40px;
-                font-size: 30px;
-            }
-
-            .controls {
-                flex-wrap: wrap;
-            }
-
-            .game-info {
-                flex-direction: column;
-                width: 100%;
-            }
+        .selected {
+            outline: 3px solid #00f;
+        }
+        .legal-move {
+            outline: 3px solid #0a0;
+        }
+        #status {
+            font-weight: bold;
+            margin: 10px;
+            min-height: 24px;
+        }
+        #moves-log {
+            margin: 10px auto;
+            max-width: 400px;
+            text-align: left;
+            height: 150px;
+            overflow-y: auto;
+            border: 1px solid #333;
+            padding: 5px;
+            background-color: #f9f9f9;
+            font-family: monospace;
+            font-size: 14px;
         }
     </style>
 </head>
 <body>
-    <div class="game-container">
-        <h2>Chess (Vanilla JS)</h2>
-        
-        <div class="controls">
-            <button onclick="resetGame()">Новая игра</button>
-            <button onclick="undoMove()">Отменить ход</button>
-            <button onclick="saveGame()">Сохранить</button>
-            <button onclick="loadGame()">Загрузить</button>
-        </div>
+<h1>Шахматы</h1>
+<div id="status">Загрузка...</div>
+<div id="board"></div>
+<div id="moves-log"></div>
 
-        <div id="timer">
-            <div class="timer-box">Белые: <span id="white-timer">10:00</span></div>
-            <div class="timer-box">Черные: <span id="black-timer">10:00</span></div>
-        </div>
-
-        <div id="info">
-            <div>Ходит: <span id="turn-indicator">Белые</span></div>
-        </div>
-
-        <div id="board" class="chessboard"></div>
-
-        <div id="check-status"></div>
-
-        <div class="game-info">
-            <div class="log-container">
-                <div class="log-title">История ходов</div>
-                <div class="log-content" id="move-log"></div>
-            </div>
-            <div class="log-container">
-                <div class="log-title">Взятые фигуры</div>
-                <div class="log-content" id="captured-pieces"></div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // Здесь должен быть весь JavaScript код, который я предоставил ранее
-        // Вставьте его сюда без изменений
-    
-    const boardEl = document.getElementById('board');
-    const turnIndicator = document.getElementById('turn-indicator');
-    const checkStatus = document.getElementById('check-status');
-    const moveLog = document.getElementById('move-log');
-    const capturedList = document.getElementById('captured-pieces');
-
-    const size = 8;
-    const board = [];
-    let currentTurn = 'white';
-    let selected = null;
-    let capturedPieces = [];
-
-    const PIECES = {
-        white: { p: '♙', r: '♖', n: '♘', b: '♗', q: '♕', k: '♔' },
-        black: { p: '♟', r: '♜', n: '♞', b: '♝', q: '♛', k: '♚' }
-    };
-
-    function createBoard() {
-        boardEl.innerHTML = '';
-        for (let y = 0; y < size; y++) {
-            board[y] = [];
-            for (let x = 0; x < size; x++) {
-                const cell = document.createElement('div');
-                cell.className = 'cell ' + ((x + y) % 2 === 0 ? 'white' : 'black');
-                cell.dataset.x = x;
-                cell.dataset.y = y;
-                cell.addEventListener('click', () => handleClick(x, y));
-                boardEl.appendChild(cell);
-                board[y][x] = null;
-            }
-        }
-    }
-
-    function setupPieces() {
-        const setup = [
-            ['r','n','b','q','k','b','n','r'],
-            ['p','p','p','p','p','p','p','p'],
-            [], [], [], [],
-            ['p','p','p','p','p','p','p','p'],
-            ['r','n','b','q','k','b','n','r']
-        ];
-
-        for (let y = 0; y < size; y++) {
-            for (let x = 0; x < size; x++) {
-                const piece = setup[y] && setup[y][x];
-                if (piece) {
-                    const color = y < 2 ? 'black' : 'white';
-                    board[y][x] = { type: piece, color };
-                }
-            }
-        }
-    }
-
-    function render() {
-        for (let y = 0; y < size; y++) {
-            for (let x = 0; x < size; x++) {
-                const cell = getCell(x, y);
-                cell.textContent = '';
-                const piece = board[y][x];
-                if (piece) cell.textContent = PIECES[piece.color][piece.type];
-                cell.classList.remove('selected');
-            }
-        }
-        const check = isKingInCheck(currentTurn);
-        const hasMoves = playerHasLegalMoves(currentTurn);
-        if (check && !hasMoves) {
-            checkStatus.textContent = 'Мат! ' + (currentTurn === 'white' ? 'Черные' : 'Белые') + ' победили!';
-        } else if (check) {
-            checkStatus.textContent = 'Шах!';
-        } else {
-            checkStatus.textContent = '';
-        }
-    }
-
-    function getCell(x, y) {
-        return document.querySelector(`.cell[data-x='${x}'][data-y='${y}']`);
-    }
-
-    function handleClick(x, y) {
-        const piece = board[y][x];
-        if (selected) {
-            const [sx, sy] = selected;
-            const valid = getValidMoves(sx, sy);
-            if (valid.some(([tx, ty]) => tx === x && ty === y)) {
-                const moving = board[sy][sx];
-                const captured = board[y][x];
-                if (captured) capturedPieces.push(captured);
-                board[y][x] = moving;
-                board[sy][sx] = null;
-                addToLog(`${moving.color[0].toUpperCase() + moving.type.toUpperCase()}: ${sx},${sy} → ${x},${y}`);
-                currentTurn = currentTurn === 'white' ? 'black' : 'white';
-                turnIndicator.textContent = currentTurn === 'white' ? 'Белые' : 'Черные';
-            }
-            selected = null;
-            render();
-            updateCaptured();
-        } else if (piece && piece.color === currentTurn) {
-            selected = [x, y];
-            getCell(x, y).classList.add('selected');
-        }
-    }
-
-    function addToLog(text) {
-        const entry = document.createElement('div');
-        entry.textContent = text;
-        moveLog.appendChild(entry);
-    }
-
-    function updateCaptured() {
-        capturedList.innerHTML = 'Съеденные фигуры: ' + capturedPieces.map(p => PIECES[p.color][p.type]).join(' ');
-    }
-
-    function getValidMoves(x, y, skipCheck = false) {
-        const piece = board[y][x];
-        if (!piece) return [];
-        let moves = [];
-
-        const directions = {
-            p: () => {
-                const dir = piece.color === 'white' ? -1 : 1;
-                const startRow = piece.color === 'white' ? 6 : 1;
-                if (inBounds(x, y + dir) && !board[y + dir][x]) moves.push([x, y + dir]);
-                if (y === startRow && !board[y + dir][x] && !board[y + 2 * dir][x]) moves.push([x, y + 2 * dir]);
-                [-1, 1].forEach(dx => {
-                    const nx = x + dx, ny = y + dir;
-                    if (inBounds(nx, ny) && board[ny][nx] && board[ny][nx].color !== piece.color) moves.push([nx, ny]);
-                });
-            },
-            r: () => lineMoves([[1,0],[0,1],[-1,0],[0,-1]]),
-            b: () => lineMoves([[1,1],[1,-1],[-1,1],[-1,-1]]),
-            q: () => lineMoves([[1,0],[0,1],[-1,0],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]),
-            n: () => {
-                [[1,2],[2,1],[2,-1],[1,-2],[-1,-2],[-2,-1],[-2,1],[-1,2]].forEach(([dx,dy]) => {
-                    const nx = x + dx, ny = y + dy;
-                    if (inBounds(nx, ny) && (!board[ny][nx] || board[ny][nx].color !== piece.color)) {
-                        moves.push([nx, ny]);
-                    }
-                });
-            },
-            k: () => {
-                for (let dx = -1; dx <= 1; dx++) {
-                    for (let dy = -1; dy <= 1; dy++) {
-                        if (dx === 0 && dy === 0) continue;
-                        const nx = x + dx, ny = y + dy;
-                        if (inBounds(nx, ny)) {
-                            const target = board[ny][nx];
-                            if (!target || target.color !== piece.color) moves.push([nx, ny]);
-                        }
-                    }
-                }
-            }
-        };
-
-        function lineMoves(dirs) {
-            dirs.forEach(([dx,dy]) => {
-                for (let i = 1; i < size; i++) {
-                    const nx = x + dx*i, ny = y + dy*i;
-                    if (!inBounds(nx, ny)) break;
-                    const t = board[ny][nx];
-                    if (t) {
-                        if (t.color !== piece.color) moves.push([nx, ny]);
-                        break;
-                    } else moves.push([nx, ny]);
-                }
-            });
-        }
-
-        if (directions[piece.type]) directions[piece.type]();
-        return skipCheck ? moves : moves.filter(([nx, ny]) => !movePutsKingInCheck(x, y, nx, ny));
-    }
-
-    function movePutsKingInCheck(sx, sy, tx, ty) {
-        const piece = board[sy][sx];
-        const captured = board[ty][tx];
-        board[ty][tx] = piece;
-        board[sy][sx] = null;
-        const check = isKingInCheck(piece.color);
-        board[sy][sx] = piece;
-        board[ty][tx] = captured;
-        return check;
-    }
-
-    function inBounds(x, y) {
-        return x >= 0 && x < size && y >= 0 && y < size;
-    }
-
-    function isKingInCheck(color) {
-        let kingPos = null;
-        for (let y = 0; y < size; y++) {
-            for (let x = 0; x < size; x++) {
-                const p = board[y][x];
-                if (p && p.type === 'k' && p.color === color) {
-                    kingPos = [x, y];
-                    break;
-                }
-            }
-        }
-        if (!kingPos) return true;
-        for (let y = 0; y < size; y++) {
-            for (let x = 0; x < size; x++) {
-                const p = board[y][x];
-                if (p && p.color !== color) {
-                    const saved = currentTurn;
-                    currentTurn = p.color;
-                    const moves = getValidMoves(x, y, true);
-                    currentTurn = saved;
-                    if (moves.some(([mx, my]) => mx === kingPos[0] && my === kingPos[1])) return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    function playerHasLegalMoves(color) {
-        for (let y = 0; y < size; y++) {
-            for (let x = 0; x < size; x++) {
-                const piece = board[y][x];
-                if (piece && piece.color === color) {
-                    if (getValidMoves(x, y).length > 0) return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    createBoard();
-    setupPieces();
-    render();
-    </script>
+<script src="logic.js"></script>
 </body>
 </html>
