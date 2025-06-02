@@ -301,6 +301,7 @@
         const color = figureColor(fig);
         const enemy = color === 'white' ? 'black' : 'white';
         //DSDIUOFSDUIF
+        //asdasdasdasd
         // Добавляем взятую фигуру в список
         if (targetFig) {
             capturedPieces[figureColor(targetFig)].push(targetFig);
